@@ -4,11 +4,15 @@ using namespace std;
 
 string CHESS[7] = {"empty","pawn","horse","bishop","rook","queen","king"};
 
+bool select = false;
+void selected(chessSquare scq){
+
+}
+
 class chessPiece{
 public:
 	int pieceDef;
 	bool white;
-
 	chessPiece (int pd,bool w){
 		pieceDef = pd;
 		white = w;
@@ -34,6 +38,14 @@ public:
 	chessSquare(){
 		x=0;y=0;
 		white = true;
+	}
+
+	void clearSquare(){
+
+	}
+
+	void setSquare(chessPiece cp){
+		
 	}
 };
 
@@ -83,7 +95,7 @@ public:
 
 	}
  void click(int button, int state, int x, int y){
-			if(state == GLUT_DOWN){
+			if(state == GLUT_DOWN && !select){
 			int a = x;
 			int b = 1000 - y;
 			a = a/100;
@@ -94,7 +106,7 @@ public:
 				cout << "\tsquare color = "<<(board[--a][--b].white?"white":"black") << endl;
 				cout << "\tselected piece = "<<CHESS[board[a][b].curr.pieceDef]<<endl;
 				cout << "\tpiece color = "<<(board[a][b].curr.white?"white":"black") << endl;
-
+				selected(board[i][j]);
 			}
 
 		}
