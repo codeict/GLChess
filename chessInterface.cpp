@@ -4,10 +4,7 @@ using namespace std;
 
 string CHESS[7] = {"empty","pawn","horse","bishop","rook","queen","king"};
 
-bool select = false;
-void selected(chessSquare scq){
-
-}
+bool isSelected = false;
 
 class chessPiece{
 public:
@@ -28,6 +25,15 @@ public:
 		glRecti(x+15,y+15,x+85,y+15);
 		glFlush();
 	}
+
+	void setEmpty(){
+		pieceDef= 0;
+	}
+
+	void operator =(chessPiece c){
+		this->pieceDef = c.pieceDef;
+		this->white = c.white;
+	}
 };
 
 class chessSquare{
@@ -35,19 +41,27 @@ public:
 	int x , y;
 	chessPiece curr;
 	bool white;
+	bool legal;
 	chessSquare(){
 		x=0;y=0;
 		white = true;
+		legal = false;
 	}
 
 	void clearSquare(){
-
+		curr.setEmpty();
 	}
 
 	void setSquare(chessPiece cp){
-		
+		curr.white = cp.white;
+		curr.pieceDef = cp.pieceDef;
 	}
-};
+}selectedCQ;
+
+void selected(chessSquare scq){
+	selectedCQ = scq;
+	isSelected = true;
+}
 
 class chessboard{
 chessSquare board[8][8];
@@ -94,19 +108,43 @@ public:
 		}
 
 	}
+
+	void resetLegal(){
+		for(int i = 0 ; i < 8 ; i++){
+			for(int j = 0 ; j < 8 ; j++){
+				board[i][j].legal = false;
+			}
+		}
+	}
+
+	void move(chessSquare cs){
+		if(cs.legal || 1){
+			resetLegal();
+			cs.curr = selectedCQ.curr;
+			selectedCQ.clearSquare();
+			isSelected = false;
+		}
+	}
+
  void click(int button, int state, int x, int y){
-			if(state == GLUT_DOWN && !select){
+			if(state == GLUT_DOWN){
 			int a = x;
 			int b = 1000 - y;
 			a = a/100;
 			b = b/100;
 			if(a>0&&a<9&&b>0&&b<9){
-				char c = 64 + b;
-				cout << "squareSelected "<<c<<a<<endl;
-				cout << "\tsquare color = "<<(board[--a][--b].white?"white":"black") << endl;
-				cout << "\tselected piece = "<<CHESS[board[a][b].curr.pieceDef]<<endl;
-				cout << "\tpiece color = "<<(board[a][b].curr.white?"white":"black") << endl;
-				selected(board[i][j]);
+				if(!isSelected){
+					char c = 64 + b;
+					cout << "squareSelected "<<c<<a<<endl;
+					cout << "\tsquare color = "<<(board[--a][--b].white?"white":"black") << endl;
+					cout << "\tselected piece = "<<CHESS[board[a][b].curr.pieceDef]<<endl;
+					cout << "\tpiece color = "<<(board[a][b].curr.white?"white":"black") << endl;
+
+					selected(board[a][b]);
+				}else{
+					move(board[a][b]);
+				}
+
 			}
 
 		}
