@@ -3,10 +3,8 @@
 using namespace std;
 
 string CHESS[7] = {"empty","pawn","horse","bishop","rook","queen","king"};
-int hdx = { 1, 2, 2, 1,-1,-2,-2,-1};
-int hdy = { 2, 1,-1,-2,-2,-1, 1, 2};
-
-bool isSelected = false;
+int hdx[8] = { 1, 2, 2, 1,-1,-2,-2,-1};
+int hdy[8] = { 2, 1,-1,-2,-2,-1, 1, 2};
 
 class chessPiece{
 public:
@@ -44,6 +42,7 @@ public:
 	chessPiece curr;
 	bool white;
 	bool legal;
+
 	chessSquare(){
 		x=0;y=0;
 		white = true;
@@ -58,17 +57,17 @@ public:
 		curr.white = cp.white;
 		curr.pieceDef = cp.pieceDef;
 	}
-}selectedCQ;
+};
 
-void selected(chessSquare scq){
-	selectedCQ = scq;
-	isSelected = true;
-}
+
 
 class chessboard{
 chessSquare board[8][8];
+bool isSelected ;
+int m,n;
 public:
 	void initiate(){
+		isSelected = false;
 		bool white = true;
 		int x = 100,y = 100;
 		for(int i = 0 ; i <8;i++){
@@ -111,6 +110,11 @@ public:
 
 	}
 
+	void getlegal(int a , int b){
+		m =a ; n = b ;
+		isSelected = true;
+	}
+
 	void resetLegal(){
 		for(int i = 0 ; i < 8 ; i++){
 			for(int j = 0 ; j < 8 ; j++){
@@ -119,11 +123,15 @@ public:
 		}
 	}
 
-	void move(chessSquare cs){
-		if(cs.legal || 1){
+	void move(int a , int b){
+		if(m==a && n==b){
+			isSelected = false;
+			return;
+		}
+		if(board[a][b].legal || true){
 			resetLegal();
-			cs.curr = selectedCQ.curr;
-			selectedCQ.clearSquare();
+			board[a][b].curr = board[m][n].curr;
+			board[m][n].clearSquare();
 			isSelected = false;
 		}
 	}
@@ -142,58 +150,48 @@ public:
 					cout << "\tselected piece = "<<CHESS[board[a][b].curr.pieceDef]<<endl;
 					cout << "\tpiece color = "<<(board[a][b].curr.white?"white":"black") << endl;
 
-					selected(board[a][b]);
+					getlegal( a, b);
 				}else{
-					move(board[a][b]);
+					move(--a, --b);
 				}
-
 			}
+		}
+	}
+
+	bool legalState(bool lastWhite){
+		int a,b;
+		for (int i =0 ; i<8; i++){
+			for (int j = 0; j<8; j++){
+				if (cb.board[i][j].chessPiece.pieceDef == 6 && cb.board[i][j].chessPiece.white == lastWhite)
+					a = i,b=j;
+			}
+		}
+
+		for (int i = 0; i<8; i++){												//check if horse is attacking
+			int x = a+hdx[i], y = b+hdy[i];
 
 		}
 	}
 
+	vector<int> legalMoves(int pos){
+		int a = pos/8,b = pos%8;
+		int piece = cb.board[a][b].curr.pieceDef;
+		bool pieceWhite = cb.board[a][b].curr.white;
+		if (piece == 1){														//piece is a pawn
+		}
+		else if (piece == 2){													//piece is a horse
+		}
+		else if (piece == 3){													//piece is a bishop
+		}
+		else if (piece == 4){													//piece is a rook
+		}
+		else if (piece == 5){													//piece is a queen
+		}
+		else {
+		}
+
+	}
 }cb;
-
-bool legalState(bool lastWhite){
-	int a,b;
-	for (int i =0 ; i<8; i++){
-		for (int j = 0; j<8; j++){
-			if (cb.board[i][j].chessPiece.pieceDef == 6 && cb.board[i][j].chessPiece.white == lastWhite)
-				a = i,b=j;
-		}
-	}
-
-	for (int i = 0; i<8; i++){												//check if horse is attacking
-		int x = a+hdx[i], y = b+hdy[i];
-		
-	}
-}
-
-vector<int> legalMoves(int pos){
-	int a = pos/8,b = pos%8;
-	int piece = cb.board[a][b].chessPiece.pieceDef;
-	bool pieceWhite = cb.board[a][b].chessPiece.white;
-	if (piece == 1){														//piece is a pawn
-
-		if 
-	}
-	else if (piece == 2){													//piece is a horse
-
-	}
-	else if (piece == 3){													//piece is a bishop
-
-	}
-	else if (piece == 4){													//piece is a rook
-
-	}
-	else if (piece == 5){													//piece is a queen
-
-	}
-	else {																	//piece is a king
-
-	}
-
-}
 
 void click(int button, int state, int x, int y){
 		 cb.click(button,state,x,y);
@@ -205,8 +203,6 @@ void init2d()//how to display
 	glMatrixMode (GL_PROJECTION);
 	gluOrtho2D (0.0,1000.0, 0.0, 1000.0);//same like window size(xl,xh,yl,yh)
 }
-
-
 
 void display(void)
 {
