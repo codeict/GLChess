@@ -3,6 +3,8 @@
 using namespace std;
 
 string CHESS[7] = {"empty","pawn","horse","bishop","rook","queen","king"};
+int hdx = { 1, 2, 2, 1,-1,-2,-2,-1};
+int hdy = { 2, 1,-1,-2,-2,-1, 1, 2};
 
 bool select = false;
 void selected(chessSquare scq){
@@ -113,6 +115,47 @@ public:
 	}
 
 }cb;
+
+bool legalState(bool lastWhite){
+	int a,b;
+	for (int i =0 ; i<8; i++){
+		for (int j = 0; j<8; j++){
+			if (cb.board[i][j].chessPiece.pieceDef == 6 && cb.board[i][j].chessPiece.white == lastWhite)
+				a = i,b=j;
+		}
+	}
+
+	for (int i = 0; i<8; i++){												//check if horse is attacking
+		int x = a+hdx[i], y = b+hdy[i];
+		
+	}
+}
+
+vector<int> legalMoves(int pos){
+	int a = pos/8,b = pos%8;
+	int piece = cb.board[a][b].chessPiece.pieceDef;
+	bool pieceWhite = cb.board[a][b].chessPiece.white;
+	if (piece == 1){														//piece is a pawn
+
+		if 
+	}
+	else if (piece == 2){													//piece is a horse
+
+	}
+	else if (piece == 3){													//piece is a bishop
+
+	}
+	else if (piece == 4){													//piece is a rook
+
+	}
+	else if (piece == 5){													//piece is a queen
+
+	}
+	else {																	//piece is a king
+
+	}
+
+}
 
 void click(int button, int state, int x, int y){
 		 cb.click(button,state,x,y);
