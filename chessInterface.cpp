@@ -1,5 +1,7 @@
 #include <GL/glut.h>
 #include <bits/stdc++.h>
+#include "printerw.cpp"
+#include "printerb.cpp"
 using namespace std;
 
 string CHESS[7] = {"empty","pawn","horse","bishop","rook","queen","king"};
@@ -23,12 +25,6 @@ public:
 	chessPiece(){
 		pieceDef = 0;
 		white = true;
-	}
-	void draw(int x, int y ){
-		//cout << "piece draw called"<<endl;
-		glColor3f(1.0,1.0,0.0);
-		glRecti(x+15,y+15,x+85,y+15);
-		glFlush();
 	}
 
 	void setEmpty(){
@@ -54,13 +50,85 @@ public:
 		legal = false;
 	}
 
-	void clearSquare(){
-		curr.setEmpty();
+	void drawPiece(){
+		if(curr.pieceDef == 0){
+			if(white){
+				glColor3f(0.941,0.941,0.874);
+			}else{
+				glColor3f(0.247,0.345,0.4);
+			}
+			glRecti(x+10,y+10,x+90,y+90);
+			return;
+		}
+		if(curr.white){
+			switch (curr.pieceDef) {
+				case 1:
+						drawwP(x+10,y+10);
+						break;
+				case 2:
+						drawwN(x+10,y+10);
+						break;
+				case 3:
+						drawwB(x+10,y+10);
+						break;
+				case 4:
+						drawwR(x+10,y+10);
+						break;
+				case 5:
+						drawwQ(x+10,y+10);
+						break;
+				case 6:
+						drawwK(x+10,y+10);
+						break;
+					}
+		}else{
+			switch (curr.pieceDef) {
+				case 1:
+						drawbP(x+10,y+10);
+						break;
+				case 2:
+						drawbN(x+10,y+10);
+						break;
+				case 3:
+						drawbB(x+10,y+10);
+						break;
+				case 4:
+						drawbR(x+10,y+10);
+						break;
+				case 5:
+						drawbQ(x+10,y+10);
+						break;
+				case 6:
+						drawbK(x+10,y+10);
+						break;
+					}
+		}
 	}
-
 	void setSquare(chessPiece cp){
 		curr.white = cp.white;
 		curr.pieceDef = cp.pieceDef;
+	}
+
+	void setAslegal(){
+		glColor3f(0.7421,0.9196,0.62109);
+		glRecti(x,y,x+100,y+100);
+		drawPiece();
+		legal = true;
+	}
+
+	void setNormal(){
+		legal = false;
+		setclear();
+		drawPiece();
+	}
+
+	void setclear(){
+		if(white){
+			glColor3f(0.941,0.941,0.874);
+		}else{
+			glColor3f(0.247,0.345,0.4);
+		}
+		glRecti(x,y,x+100,y+100);
 	}
 };
 
@@ -73,12 +141,11 @@ int lastx,lasty;
 	void initiate(){
 		lastWhite = false;
 		bool white = true;
-		resetLegal();
 		int x = 100,y = 100;
 		for(int i = 0 ; i <8;i++){
 			for(int j = 0 ; j <8;j++){
-					board[i][j].x = x;
-					board[i][j].y = y;
+					board[i][j].x = y;
+					board[i][j].y = x;
 					board[i][j].white = !white;
 					glRecti(x,y,x+100,y+100);
 					x+=100;
@@ -98,7 +165,7 @@ int lastx,lasty;
 			x = 100;
 			y+=100;
 		}
-		glFlush();
+
 	}
 	void setpieces(){
 		int order[8] = {4,2,3,5,6,3,2,4};
@@ -112,6 +179,12 @@ int lastx,lasty;
 			board[i][7].curr.white = false;
 			board[i][7].curr.pieceDef = order[i];
 		}
+		for(int i = 0 ; i < 8 ; i++){
+			for(int j = 0 ; j < 8 ; j++){
+				board[i][j].drawPiece();
+			}
+			glFlush();
+		}
 
 	}
 
@@ -119,17 +192,18 @@ int lastx,lasty;
 		resetLegal();
 		vector<int> moves = legalMoves(a*8+b, lastWhite);
 		for(int i = 0 ; i < moves.size() ; i++){
-			board[moves[i]/8][moves[i]%8].legal = true;
+			board[moves[i]/8][moves[i]%8].setAslegal();
 		}
 		for (auto x : moves){
 			cout<<x/8<<" "<<x%8<<endl;
 		}
+		glFlush();
 	}
 
 	void resetLegal(){
 		for(int i = 0 ; i < 8 ; i++){
 			for(int j = 0 ; j < 8 ; j++){
-				board[i][j].legal = false;
+				board[i][j].setNormal();
 			}
 		}
 	}
@@ -137,21 +211,26 @@ int lastx,lasty;
 	void move(int a , int b){
 		resetLegal();
 		move_stack.push_back({lastx*8 + lasty, a*8 + b});
-		
+
 		board[a][b].curr.pieceDef = board[lastx][lasty].curr.pieceDef;
 		board[a][b].curr.white = board[lastx][lasty].curr.white;
 		board[lastx][lasty].curr.pieceDef = 0;
-		lastWhite = !lastWhite;	
-		cout<<"Moved ("<<lastx<<","<<lasty<<") to ("<<a<<","<<b<<")"<<endl;	
+		board[lastx][lasty].drawPiece();
+		board[a][b].drawPiece();
+
+		lastWhite = !lastWhite;
+		//cout<<"Moved ("<<lastx<<","<<lasty<<") to ("<<a<<","<<b<<")"<<endl;
 	}
 
  void click(int button, int state, int x, int y){
 			if(state == GLUT_DOWN){
 			int a = x;
 			int b = 1000 - y;
+			cout << a << " " << b << endl;
 			a = a/100;
 			b = b/100;
 			a--,b--;
+				cout << a << " " << b << endl;
 			if(a>=0&&a<8&&b>=0&&b<8){
 				if (board[a][b].legal == true){
 					move(a,b);
@@ -164,8 +243,9 @@ int lastx,lasty;
 					cout << "\tpiece color = "<<(board[a][b].curr.white?"white":"black") << endl;
 					getlegal(a,b);
 					lastx = a, lasty = b;
-				}	
+				}
 			}
+			glFlush();
 		}
 	}
 
@@ -176,7 +256,7 @@ bool legalState(bool lastWhite){
 	int a,b;
 	for (int i =0 ; i<8; i++){
 		for (int j = 0; j<8; j++){
-			if (cb.board[i][j].curr.pieceDef == 6 && cb.board[i][j].curr.white == lastWhite)
+			if (cb.board[i][j].curr.pieceDef == 6 && (cb.board[i][j].curr.white == lastWhite))
 				a = i,b=j;
 		}
 	}
@@ -195,7 +275,7 @@ bool legalState(bool lastWhite){
 			if (cb.board[x][y].curr.pieceDef != 0){
 
 				chessPiece found = cb.board[x][y].curr;
-				
+
 				if (found.white == lastWhite || found.pieceDef == 2 || found.pieceDef == 4){
 					// Intensionally Empty
 				}
@@ -213,7 +293,7 @@ bool legalState(bool lastWhite){
 				else if (found.pieceDef == 5){								//Found opposite color Queen diagonally
 					return false;
 				}
-				break;				
+				break;
 			}
 			else
 				x+=bdx[i], y+=bdy[i];
@@ -230,7 +310,7 @@ bool legalState(bool lastWhite){
 				}
 				else if (found.pieceDef == 4 || found.pieceDef == 5 || (found.pieceDef == 7 && abs(x-a)+abs(y-b) == 1))
 					return false;
-				break;	
+				break;
 			}
 			else
 				x+=rdx[i], y+=rdy[i];
@@ -343,7 +423,7 @@ vector<int> legalMoves(int pos, bool lastWhite){								//Castling and Empassant
 					cb.board[x][y].curr.pieceDef == delp;
 					cb.board[x][y].curr.white = !found.white;
 				}
-					break;				
+					break;
 				}
 				else{
 					found.pieceDef = 0;
@@ -378,7 +458,7 @@ vector<int> legalMoves(int pos, bool lastWhite){								//Castling and Empassant
 					cb.board[x][y].curr.pieceDef == delp;
 					cb.board[x][y].curr.white = !found.white;
 				}
-					break;				
+					break;
 				}
 				else{
 					found.pieceDef = 0;
@@ -411,7 +491,7 @@ vector<int> legalMoves(int pos, bool lastWhite){								//Castling and Empassant
 					cb.board[x][y].curr.pieceDef == delp;
 					cb.board[x][y].curr.white = !found.white;
 				}
-					break;				
+					break;
 				}
 				else{
 					found.pieceDef = 0;
@@ -442,7 +522,7 @@ vector<int> legalMoves(int pos, bool lastWhite){								//Castling and Empassant
 					cb.board[x][y].curr.pieceDef == delp;
 					cb.board[x][y].curr.white = !found.white;
 				}
-					break;				
+					break;
 				}
 				else{
 					found.pieceDef = 0;
@@ -492,6 +572,7 @@ vector<int> legalMoves(int pos, bool lastWhite){								//Castling and Empassant
 
 void click(int button, int state, int x, int y){
 		 cb.click(button,state,x,y);
+
 }
 
 void init2d()//how to display
@@ -510,6 +591,9 @@ void display(void)
 	glFlush();
 	cb.initiate();
 	cb.setpieces();
+
+	cout << "lets start " << endl;
+
 }
 
 int main(int argc,char *argv[])
