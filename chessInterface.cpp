@@ -3,7 +3,10 @@
 #include "printerw.cpp"
 #include "printerb.cpp"
 using namespace std;
-
+static int menu_id ;
+static int value;
+static int window;
+int screen_render = 0;
 string CHESS[7] = {"empty","pawn","horse","bishop","rook","queen","king"};
 int hdx[8] = { 1, 2, 2, 1,-1,-2,-2,-1};
 int hdy[8] = { 2, 1,-1,-2,-2,-1, 1, 2};
@@ -180,6 +183,11 @@ int lastx,lasty;
 			board[i][7].curr.pieceDef = order[i];
 		}
 		for(int i = 0 ; i < 8 ; i++){
+			for(int j = 2 ; j < 6 ; j++){
+					board[i][j].curr.pieceDef  = 0;
+			}
+		}
+		for(int i = 0 ; i < 8 ; i++){
 			for(int j = 0 ; j < 8 ; j++){
 				board[i][j].drawPiece();
 			}
@@ -223,7 +231,7 @@ int lastx,lasty;
 	}
 
  void click(int button, int state, int x, int y){
-			if(state == GLUT_DOWN){
+			if(button == GLUT_LEFT_BUTTON &&state == GLUT_DOWN){
 			int a = x;
 			int b = 1000 - y;
 			cout << a << " " << b << endl;
@@ -245,7 +253,7 @@ int lastx,lasty;
 					lastx = a, lasty = b;
 				}
 			}
-			glFlush();
+
 		}
 	}
 
@@ -571,7 +579,9 @@ vector<int> legalMoves(int pos, bool lastWhite){								//Castling and Empassant
 }
 
 void click(int button, int state, int x, int y){
-		 cb.click(button,state,x,y);
+	if(button != GLUT_RIGHT_BUTTON){
+		cb.click(button,state,x,y);
+	}
 
 }
 
@@ -584,16 +594,42 @@ void init2d()//how to display
 
 void display(void)
 {
-	glClear(GL_COLOR_BUFFER_BIT);
-	glColor3f(0.0, 0.0, 0.0);
-	glRecti(90,90,910,910);
-	glColor3f(0.247, 0.345, 0.4);
-	glFlush();
-	cb.initiate();
-	cb.setpieces();
+	if(value == 1){
+    glutPostRedisplay();
+		return;
+  }
+	if(screen_render == 0){
+		glClear(GL_COLOR_BUFFER_BIT);
+		glColor3f(0.0, 0.0, 0.0);
+		glRecti(90,90,910,910);
+		glColor3f(0.247, 0.345, 0.4);
+		glFlush();
+		cb.initiate();
+		cb.setpieces();
+		screen_render = 1;
+		cout << "lets start " << endl;
+	}
 
-	cout << "lets start " << endl;
 
+}
+void menu(int num){
+  if(num == 0){
+    glutDestroyWindow(window);
+    exit(0);
+  }else{
+		if(num == 1){
+			screen_render = 0;
+		}
+  }
+  glutPostRedisplay();
+}
+
+void createMenu(void){
+		menu_id = glutCreateMenu(menu);
+    glutAddMenuEntry("Restart", 1);
+		glutAddMenuEntry("Undo", 2);
+    glutAddMenuEntry("Quit", 0);
+		glutAttachMenu(GLUT_RIGHT_BUTTON);
 }
 
 int main(int argc,char *argv[])
@@ -601,10 +637,12 @@ int main(int argc,char *argv[])
 	glutInit(&argc,argv);
 	glutInitWindowSize (1000, 1000);
 	glutInitWindowPosition (00, 00);
-	glutCreateWindow ("CHESS");
+	window = glutCreateWindow ("CHESS");
 	init2d();
 	glutDisplayFunc(display);
 	glutMouseFunc(click);
+	createMenu();
 	glutMainLoop();
+
 	return 0;
 }
