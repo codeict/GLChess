@@ -67,11 +67,13 @@ public:
 class chessboard{
 public:
 chessSquare board[8][8];
-bool isSelected ;
-int m,n;
+vector<pair<int,int> > move_stack;
+bool lastWhite;
+int lastx,lasty;
 	void initiate(){
-		isSelected = false;
+		lastWhite = false;
 		bool white = true;
+		resetLegal();
 		int x = 100,y = 100;
 		for(int i = 0 ; i <8;i++){
 			for(int j = 0 ; j <8;j++){
@@ -101,7 +103,7 @@ int m,n;
 	void setpieces(){
 		int order[8] = {4,2,3,5,6,3,2,4};
 		for(int i = 0 ; i < 8 ; i++){
-			//board[i][1].curr.pieceDef = 1;
+			board[i][1].curr.pieceDef = 1;
 			board[i][1].curr.white = true;
 			board[i][0].curr.white = true;
 			board[i][0].curr.pieceDef = order[i];
@@ -114,7 +116,14 @@ int m,n;
 	}
 
 	void getlegal(int a , int b){
-		m =a ; n = b ;
+		resetLegal();
+		vector<int> moves = legalMoves(a*8+b, lastWhite);
+		for(int i = 0 ; i < moves.size() ; i++){
+			board[moves[i]/8][moves[i]%8].legal = true;
+		}
+		for (auto x : moves){
+			cout<<x/8<<" "<<x%8<<endl;
+		}
 	}
 
 	void resetLegal(){
@@ -126,16 +135,14 @@ int m,n;
 	}
 
 	void move(int a , int b){
-		if(m==a && n==b){
-			isSelected = false;
-			return;
-		}
-		if(board[a][b].legal || true){
-			resetLegal();
-			board[a][b].curr = board[m][n].curr;
-			board[m][n].clearSquare();
-			isSelected = false;
-		}
+		resetLegal();
+		move_stack.push_back({lastx*8 + lasty, a*8 + b});
+		
+		board[a][b].curr.pieceDef = board[lastx][lasty].curr.pieceDef;
+		board[a][b].curr.white = board[lastx][lasty].curr.white;
+		board[lastx][lasty].curr.pieceDef = 0;
+		lastWhite = !lastWhite;	
+		cout<<"Moved ("<<lastx<<","<<lasty<<") to ("<<a<<","<<b<<")"<<endl;	
 	}
 
  void click(int button, int state, int x, int y){
@@ -146,19 +153,18 @@ int m,n;
 			b = b/100;
 			a--,b--;
 			if(a>=0&&a<8&&b>=0&&b<8){
-				if(!isSelected){
+				if (board[a][b].legal == true){
+					move(a,b);
+				}
+				else{
 					char c = 'A' + b;
 					cout << "squareSelected "<<c<<a<<endl;
 					cout << "\tsquare color = "<<(board[a][b].white?"white":"black") << endl;
 					cout << "\tselected piece = "<<CHESS[board[a][b].curr.pieceDef]<<endl;
 					cout << "\tpiece color = "<<(board[a][b].curr.white?"white":"black") << endl;
-					vector<int> moves = legalMoves(a*8+b, false);
-					for (auto x : moves){
-						cout<<x/8<<","<<x%8<<endl;
-					}
-				}else{
-					move(a, b);
-				}
+					getlegal(a,b);
+					lastx = a, lasty = b;
+				}	
 			}
 		}
 	}
@@ -232,7 +238,7 @@ bool legalState(bool lastWhite){
 	}
 }
 
-vector<int> legalMoves(int pos, bool lastWhite){
+vector<int> legalMoves(int pos, bool lastWhite){								//Castling and Empassant's yet to be implemented
 	int a = pos/8,b = pos%8;
 	chessPiece found =  cb.board[a][b].curr;
 	vector<int> moves;
@@ -278,6 +284,21 @@ vector<int> legalMoves(int pos, bool lastWhite){
 			found.pieceDef = 1;
 			cb.board[x][y].curr.pieceDef == delp;
 			cb.board[x][y].curr.white = !found.white;
+		}
+		x--;
+		if ((found.white && y == 2 )||((!found.white) && y == 5) ){					//Initial Jump
+			if (cb.board[x][y].curr.pieceDef == 0){
+			y += ((found.white)? 1 : -1);
+			if (x>=0 && x<8 && y>=0 && y<8 && cb.board[x][y].curr.pieceDef == 0){
+				found.pieceDef = 0;
+				cb.board[x][y].curr.pieceDef == 1;
+				cb.board[x][y].curr.white = found.white;
+				if (legalState(!lastWhite)){
+					moves.push_back(x*8 + y);
+				}
+				found.pieceDef = 1;
+				cb.board[x][y].curr.pieceDef == 0;
+			}}
 		}
 	}
 
