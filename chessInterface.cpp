@@ -221,10 +221,6 @@ int lastx,lasty;
 		for(int i = 0 ; i < moves.size() ; i++){
 			board[moves[i]/8][moves[i]%8].setAslegal();
 		}
-
-		for (auto x : moves){
-			cout<<x/8<<" "<<x%8<<endl;
-		}
 		glFlush();
 	}
 
@@ -249,8 +245,6 @@ int lastx,lasty;
 		board[a][b].drawPiece();
 
 		lastWhite = !lastWhite;
-
-		//cout<<"Moved ("<<lastx<<","<<lasty<<") to ("<<a<<","<<b<<")"<<endl;
 	}
 
  void click(int button, int state, int x, int y){
@@ -258,11 +252,9 @@ int lastx,lasty;
 
 				int a = x;
 				int b = 1000 - y;
-				cout << a << " " << b << endl;
 				a = a/100;
 				b = b/100;
 				a--,b--;
-				cout << a << " " << b << endl;
 				if(a>=0&&a<8&&b>=0&&b<8){
 					if (board[a][b].legal == true){
 						move(a,b);
@@ -330,7 +322,6 @@ bool legalState(bool lastWhite){
 				a = i,b=j;
 		}
 	}
-	cout<<"Checking coordinates "<<a<<" "<<b<<endl;
 	for (int i = 0; i<8; i++){												//check if horse is attacking
 		int x = a+hdx[i], y = b+hdy[i];
 		if (x<0 || x>7 || y<0 || y>7)
@@ -339,37 +330,34 @@ bool legalState(bool lastWhite){
 			return false;
 	}
 	for (int i = 0; i<4; i++){												//checking diagonal attack on king
-		cout<<"checking diagonal\n";
 		int x = a+bdx[i], y = b+bdy[i];
 		while (x>=0 && x<8 && y>=0 && y<8){
 
 			if (cb.board[x][y].curr.pieceDef != 0){
 
-				chessPiece found = cb.board[x][y].curr;
-
-				if (found.white == lastWhite || found.pieceDef == 2 || found.pieceDef == 4){
+				if (cb.board[x][y].curr.white == lastWhite || cb.board[x][y].curr.pieceDef == 2 || cb.board[x][y].curr.pieceDef == 4){
 					// Intensionally Empty
 				}
 
-				else if (found.pieceDef == 1){		//Found opposite color Pawn or King diagonally
+				else if (cb.board[x][y].curr.pieceDef == 1){		//Found opposite color Pawndiagonally
 					if ((x == a+1 || x==a-1) && y==(b+ ((lastWhite)? 1 : -1) )){
 
 						return false;
 					}
 				}
 
-				else if (found.pieceDef == 7){		//Found opposite color Pawn or King diagonally
+				else if (cb.board[x][y].curr.pieceDef == 6){		//Found opposite color King diagonally
 					if ((x == a+1 || x==a-1) && (y==b+1 || y==b-1) ){
 
 						return false;
 					}
 				}
 
-				else if (found.pieceDef == 3){								//Found opposite color Bishop diagonally
+				else if (cb.board[x][y].curr.pieceDef == 3){								//Found opposite color Bishop diagonally
 					return false;
 				}
 
-				else if (found.pieceDef == 5){								//Found opposite color Queen diagonally
+				else if (cb.board[x][y].curr.pieceDef == 5){								//Found opposite color Queen diagonally
 					return false;
 				}
 				break;
@@ -378,17 +366,30 @@ bool legalState(bool lastWhite){
 				x+=bdx[i], y+=bdy[i];
 		}
 	}
-	for (int i = 0; i<4; i++){												//checking horizontal and vertical attack on king
+	for (int i = 0; i<4; i++){												//checking diagonal attack on king
 		int x = a+rdx[i], y = b+rdy[i];
 		while (x>=0 && x<8 && y>=0 && y<8){
+
 			if (cb.board[x][y].curr.pieceDef != 0){
-				chessPiece found = cb.board[x][y].curr;
-				cout<<"Piece at "<<x<<" "<<y<<endl;
-				if (found.white == lastWhite){
+
+				if (cb.board[x][y].curr.white == lastWhite || cb.board[x][y].curr.pieceDef == 1 ||cb.board[x][y].curr.pieceDef == 2 || cb.board[x][y].curr.pieceDef == 3){
 					// Intensionally Empty
 				}
-				else if (found.pieceDef == 4 || found.pieceDef == 5 || (found.pieceDef == 7 && abs(x-a)+abs(y-b) == 1))
+
+				else if (cb.board[x][y].curr.pieceDef == 6){							//Found opposite color King HV
+					if (abs(x-a) < 2 && abs(y-b) < 2){
+
+						return false;
+					}
+				}
+
+				else if (cb.board[x][y].curr.pieceDef == 4){								//Found opposite color Rook HV
 					return false;
+				}
+
+				else if (cb.board[x][y].curr.pieceDef == 5){								//Found opposite color Queen HV
+					return false;
+				}
 				break;
 			}
 			else
@@ -398,71 +399,70 @@ bool legalState(bool lastWhite){
 	return true;
 }
 
-vector<int> legalMoves(int pos, bool lastWhite){								//Castling and Empassant's yet to be implemented
+vector<int> legalMoves(int pos, bool lastWhite){											//Castling and Empassant's yet to be implemented
 	int a = pos/8,b = pos%8;
-	chessPiece found =  cb.board[a][b].curr;
 	vector<int> moves;
-	if (found.pieceDef == 0 || found.white == lastWhite)
+	if (cb.board[a][b].curr.pieceDef == 0 || cb.board[a][b].curr.white == lastWhite)
 		return moves;
 
 
-	if (found.pieceDef == 1){													//piece is a pawn
+	if (cb.board[a][b].curr.pieceDef == 1){													//piece is a pawn
 		int x = a;
-		int y = b + ((found.white)? 1 : -1);
+		int y = b + ((cb.board[a][b].curr.white)? 1 : -1);
 		if (x>=0 && x<8 && y>=0 && y<8 && cb.board[x][y].curr.pieceDef == 0){
-			found.pieceDef = 0;
+			cb.board[a][b].curr.pieceDef = 0;
 			cb.board[x][y].curr.pieceDef = 1;
-			cb.board[x][y].curr.white = found.white;
+			cb.board[x][y].curr.white = cb.board[a][b].curr.white;
 			if (legalState(!lastWhite)){
 				moves.push_back(x*8 + y);
 			}
-			found.pieceDef = 1;
+			cb.board[a][b].curr.pieceDef = 1;
 			cb.board[x][y].curr.pieceDef = 0;
 		}
 		x--;
 		if (x>=0 && x<8 && y>=0 && y<8 && cb.board[x][y].curr.pieceDef != 0 && cb.board[x][y].curr.white == lastWhite){
 			int delp = cb.board[x][y].curr.pieceDef;
-			found.pieceDef = 0;
+			cb.board[a][b].curr.pieceDef = 0;
 			cb.board[x][y].curr.pieceDef = 1;
-			cb.board[x][y].curr.white = found.white;
+			cb.board[x][y].curr.white = cb.board[a][b].curr.white;
 			if (legalState(!lastWhite)){
 				moves.push_back(x*8 + y);
 			}
-			found.pieceDef = 1;
+			cb.board[a][b].curr.pieceDef = 1;
 			cb.board[x][y].curr.pieceDef = delp;
-			cb.board[x][y].curr.white = !found.white;
+			cb.board[x][y].curr.white = !cb.board[a][b].curr.white;
 		}
 		x+=2;
 		if (x>=0 && x<8 && y>=0 && y<8 && cb.board[x][y].curr.pieceDef != 0 && cb.board[x][y].curr.white == lastWhite){
 			int delp = cb.board[x][y].curr.pieceDef;
-			found.pieceDef = 0;
+			cb.board[a][b].curr.pieceDef = 0;
 			cb.board[x][y].curr.pieceDef = 1;
-			cb.board[x][y].curr.white = found.white;
+			cb.board[x][y].curr.white = cb.board[a][b].curr.white;
 			if (legalState(!lastWhite)){
 				moves.push_back(x*8 + y);
 			}
-			found.pieceDef = 1;
+			cb.board[a][b].curr.pieceDef = 1;
 			cb.board[x][y].curr.pieceDef = delp;
-			cb.board[x][y].curr.white = !found.white;
+			cb.board[x][y].curr.white = !cb.board[a][b].curr.white;
 		}
 		x--;
-		if ((found.white && y == 2 )||((!found.white) && y == 5) ){					//Initial Jump
+		if ((cb.board[a][b].curr.white && y == 2 )||((!cb.board[a][b].curr.white) && y == 5) ){					//Initial Jump
 			if (cb.board[x][y].curr.pieceDef == 0){
-			y += ((found.white)? 1 : -1);
+			y += ((cb.board[a][b].curr.white)? 1 : -1);
 			if (x>=0 && x<8 && y>=0 && y<8 && cb.board[x][y].curr.pieceDef == 0){
-				found.pieceDef = 0;
+				cb.board[a][b].curr.pieceDef = 0;
 				cb.board[x][y].curr.pieceDef = 1;
-				cb.board[x][y].curr.white = found.white;
+				cb.board[x][y].curr.white = cb.board[a][b].curr.white;
 				if (legalState(!lastWhite)){
 					moves.push_back(x*8 + y);
 				}
-				found.pieceDef = 1;
+				cb.board[a][b].curr.pieceDef = 1;
 				cb.board[x][y].curr.pieceDef = 0;
 			}}
 		}
 	}
 
-	else if (found.pieceDef == 2){													//piece is a horse
+	else if (cb.board[a][b].curr.pieceDef == 2){													//piece is a horse
 		int x,y;
 		for (int i = 0; i<8; i++){
 			x = a+hdx[i], y = b+hdy[i];
@@ -470,21 +470,21 @@ vector<int> legalMoves(int pos, bool lastWhite){								//Castling and Empassant
 				continue;
 			if (cb.board[x][y].curr.pieceDef == 0 || cb.board[x][y].curr.white == lastWhite){
 				int delp = cb.board[x][y].curr.pieceDef;
-				found.pieceDef = 0;
+				cb.board[a][b].curr.pieceDef = 0;
 				cb.board[x][y].curr.pieceDef = 2;
-				cb.board[x][y].curr.white = found.white;
+				cb.board[x][y].curr.white = cb.board[a][b].curr.white;
 				if (legalState(!lastWhite)){
 					moves.push_back(x*8 + y);
 				}
-				found.pieceDef = 2;
+				cb.board[a][b].curr.pieceDef = 2;
 				cb.board[x][y].curr.pieceDef = delp;
-				cb.board[x][y].curr.white = !found.white;
+				cb.board[x][y].curr.white = !cb.board[a][b].curr.white;
 			}
 		}
 	}
 
 
-	else if (found.pieceDef == 3){													//piece is a bishop
+	else if (cb.board[a][b].curr.pieceDef == 3){													//piece is a bishop
 		for (int i = 0; i<4; i++){
 			int x = a+bdx[i], y = b+bdy[i];
 			while (x>=0 && x<8 && y>=0 && y<8){
@@ -492,26 +492,26 @@ vector<int> legalMoves(int pos, bool lastWhite){								//Castling and Empassant
 				if (cb.board[x][y].curr.pieceDef != 0){
 					if (cb.board[x][y].curr.white == lastWhite){
 					int delp = cb.board[x][y].curr.pieceDef;
-					found.pieceDef = 0;
+					cb.board[a][b].curr.pieceDef = 0;
 					cb.board[x][y].curr.pieceDef = 3;
-					cb.board[x][y].curr.white = found.white;
+					cb.board[x][y].curr.white = cb.board[a][b].curr.white;
 					if (legalState(!lastWhite)){
 						moves.push_back(x*8 + y);
 					}
-					found.pieceDef = 3;
+					cb.board[a][b].curr.pieceDef = 3;
 					cb.board[x][y].curr.pieceDef = delp;
-					cb.board[x][y].curr.white = !found.white;
+					cb.board[x][y].curr.white = !cb.board[a][b].curr.white;
 				}
 					break;
 				}
 				else{
-					found.pieceDef = 0;
+					cb.board[a][b].curr.pieceDef = 0;
 					cb.board[x][y].curr.pieceDef = 3;
-					cb.board[x][y].curr.white = found.white;
+					cb.board[x][y].curr.white = cb.board[a][b].curr.white;
 					if (legalState(!lastWhite)){
 						moves.push_back(x*8 + y);
 					}
-					found.pieceDef = 3;
+					cb.board[a][b].curr.pieceDef = 3;
 					cb.board[x][y].curr.pieceDef = 0;
 					x+=bdx[i], y+=bdy[i];
 				}
@@ -520,7 +520,7 @@ vector<int> legalMoves(int pos, bool lastWhite){								//Castling and Empassant
 	}
 
 
-	else if (found.pieceDef == 4){													//piece is a rook
+	else if (cb.board[a][b].curr.pieceDef == 4){													//piece is a rook
 		for (int i = 0; i<4; i++){
 		int x = a+rdx[i], y = b+rdy[i];
 		while (x>=0 && x<8 && y>=0 && y<8){
@@ -528,33 +528,33 @@ vector<int> legalMoves(int pos, bool lastWhite){								//Castling and Empassant
 			if (cb.board[x][y].curr.pieceDef != 0){
 					if (cb.board[x][y].curr.white == lastWhite){
 					int delp = cb.board[x][y].curr.pieceDef;
-					found.pieceDef = 0;
+					cb.board[a][b].curr.pieceDef = 0;
 					cb.board[x][y].curr.pieceDef = 4;
-					cb.board[x][y].curr.white = found.white;
+					cb.board[x][y].curr.white = cb.board[a][b].curr.white;
 					if (legalState(!lastWhite)){
 						moves.push_back(x*8 + y);
 					}
-					found.pieceDef = 4;
+					cb.board[a][b].curr.pieceDef = 4;
 					cb.board[x][y].curr.pieceDef = delp;
-					cb.board[x][y].curr.white = !found.white;
+					cb.board[x][y].curr.white = !cb.board[a][b].curr.white;
 				}
 					break;
 				}
 				else{
-					found.pieceDef = 0;
+					cb.board[a][b].curr.pieceDef = 0;
 					cb.board[x][y].curr.pieceDef = 4;
-					cb.board[x][y].curr.white = found.white;
+					cb.board[x][y].curr.white = cb.board[a][b].curr.white;
 					if (legalState(!lastWhite)){
 						moves.push_back(x*8 + y);
 					}
-					found.pieceDef = 4;
+					cb.board[a][b].curr.pieceDef = 4;
 					cb.board[x][y].curr.pieceDef = 0;
 					x+=rdx[i], y+=rdy[i];
 				}
 			}
 		}
 	}
-	else if (found.pieceDef == 5){													//piece is a queen
+	else if (cb.board[a][b].curr.pieceDef == 5){													//piece is a queen
 		for (int i = 0; i<4; i++){													//checking diagonal moves
 			int x = a+bdx[i], y = b+bdy[i];
 			while (x>=0 && x<8 && y>=0 && y<8){
@@ -562,26 +562,26 @@ vector<int> legalMoves(int pos, bool lastWhite){								//Castling and Empassant
 				if (cb.board[x][y].curr.pieceDef != 0){
 					if (cb.board[x][y].curr.white == lastWhite){
 					int delp = cb.board[x][y].curr.pieceDef;
-					found.pieceDef = 0;
+					cb.board[a][b].curr.pieceDef = 0;
 					cb.board[x][y].curr.pieceDef = 5;
-					cb.board[x][y].curr.white = found.white;
+					cb.board[x][y].curr.white = cb.board[a][b].curr.white;
 					if (legalState(!lastWhite)){
 						moves.push_back(x*8 + y);
 					}
-					found.pieceDef = 5;
+					cb.board[a][b].curr.pieceDef = 5;
 					cb.board[x][y].curr.pieceDef = delp;
-					cb.board[x][y].curr.white = !found.white;
+					cb.board[x][y].curr.white = !cb.board[a][b].curr.white;
 				}
 					break;
 				}
 				else{
-					found.pieceDef = 0;
+					cb.board[a][b].curr.pieceDef = 0;
 					cb.board[x][y].curr.pieceDef = 5;
-					cb.board[x][y].curr.white = found.white;
+					cb.board[x][y].curr.white = cb.board[a][b].curr.white;
 					if (legalState(!lastWhite)){
 						moves.push_back(x*8 + y);
 					}
-					found.pieceDef = 5;
+					cb.board[a][b].curr.pieceDef = 5;
 					cb.board[x][y].curr.pieceDef = 0;
 					x+=bdx[i], y+=bdy[i];
 				}
@@ -594,26 +594,26 @@ vector<int> legalMoves(int pos, bool lastWhite){								//Castling and Empassant
 			if (cb.board[x][y].curr.pieceDef != 0){
 					if (cb.board[x][y].curr.white == lastWhite){
 					int delp = cb.board[x][y].curr.pieceDef;
-					found.pieceDef = 0;
+					cb.board[a][b].curr.pieceDef = 0;
 					cb.board[x][y].curr.pieceDef = 5;
-					cb.board[x][y].curr.white = found.white;
+					cb.board[x][y].curr.white = cb.board[a][b].curr.white;
 					if (legalState(!lastWhite)){
 						moves.push_back(x*8 + y);
 					}
-					found.pieceDef = 5;
+					cb.board[a][b].curr.pieceDef = 5;
 					cb.board[x][y].curr.pieceDef = delp;
-					cb.board[x][y].curr.white = !found.white;
+					cb.board[x][y].curr.white = !cb.board[a][b].curr.white;
 				}
 					break;
 				}
 				else{
-					found.pieceDef = 0;
+					cb.board[a][b].curr.pieceDef = 0;
 					cb.board[x][y].curr.pieceDef = 5;
-					cb.board[x][y].curr.white = found.white;
+					cb.board[x][y].curr.white = cb.board[a][b].curr.white;
 					if (legalState(!lastWhite)){
 						moves.push_back(x*8 + y);
 					}
-					found.pieceDef = 5;
+					cb.board[a][b].curr.pieceDef = 5;
 					cb.board[x][y].curr.pieceDef = 0;
 					x+=rdx[i], y+=rdy[i];
 				}
@@ -625,31 +625,28 @@ vector<int> legalMoves(int pos, bool lastWhite){								//Castling and Empassant
 			int x = a+bdx[i], y = b+bdy[i];
 			if ((x>=0 && x<8 && y>=0 && y<8)&&(cb.board[x][y].curr.pieceDef == 0 || cb.board[x][y].curr.white == lastWhite)){
 				int delp = cb.board[x][y].curr.pieceDef;
-				found.pieceDef = 0;
+				cb.board[a][b].curr.pieceDef = 0;
 				cb.board[x][y].curr.pieceDef = 6;
-				cb.board[x][y].curr.white = found.white;
+				cb.board[x][y].curr.white = cb.board[a][b].curr.white;
 				if (legalState(!lastWhite)){
-					cout<<"Success checking king at "<<x<<" "<<y<<endl;
 					moves.push_back(x*8 + y);
 				}
-				found.pieceDef = 6;
+				cb.board[a][b].curr.pieceDef = 6;
 				cb.board[x][y].curr.pieceDef = delp;
-				cb.board[x][y].curr.white = !found.white;
+				cb.board[x][y].curr.white = !cb.board[a][b].curr.white;
 			}
 			x = a+rdx[i], y = b+rdy[i];
 			if ((x>=0 && x<8 && y>=0 && y<8)&&(cb.board[x][y].curr.pieceDef == 0 || cb.board[x][y].curr.white == lastWhite)){
 				int delp = cb.board[x][y].curr.pieceDef;
-				found.pieceDef = 0;
+				cb.board[a][b].curr.pieceDef = 0;
 				cb.board[x][y].curr.pieceDef = 6;
-				cb.board[x][y].curr.white = found.white;
-				cout<<"1checking king at "<<x<<" "<<y<<endl;
+				cb.board[x][y].curr.white = cb.board[a][b].curr.white;
 				if (legalState(!lastWhite)){
-					cout<<"1Success checking king at "<<x<<" "<<y<<endl;
 					moves.push_back(x*8 + y);
 				}
-				found.pieceDef = 6;
+				cb.board[a][b].curr.pieceDef = 6;
 				cb.board[x][y].curr.pieceDef = delp;
-				cb.board[x][y].curr.white = !found.white;
+				cb.board[x][y].curr.white = !cb.board[a][b].curr.white;
 			}
 		}
 	}
