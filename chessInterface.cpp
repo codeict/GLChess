@@ -234,12 +234,34 @@ int lastx,lasty;
 
 	void move(int a , int b){
 		resetLegal();
+		if (board[lastx][lasty].curr.pieceDef==6 && abs(a-lastx) == 2){
+			if (a > lastx){
+				logentry m(board[a+1][b].curr,board[a-1][b].curr,(a+1)*8 + b, (a-1)*8 + b);
+				move_stack.push(m);
+				board[a-1][b].curr.pieceDef = 4;
+				board[a-1][b].curr.white = board[lastx][lasty].curr.white;
+				board[7][b].curr.pieceDef = 0;
+				board[a-1][b].drawPiece();
+				board[a+1][b].setclear();
+			}
+			else{
+				logentry n(board[a-2][b].curr,board[a+1][b].curr,(a-2)*8 + b, (a+1)*8 + b);
+				move_stack.push(n);
+				board[a+1][b].curr.pieceDef = 4;
+				board[a+1][b].curr.white = board[lastx][lasty].curr.white;
+				board[0][b].curr.pieceDef = 0;
+				board[a+1][b].drawPiece();
+				board[a-2][b].setclear();
+			}
+		}
 		logentry l(board[lastx][lasty].curr,board[a][b].curr,lastx*8 + lasty, a*8 + b);
 		move_stack.push(l);
 
 		board[a][b].curr.pieceDef = board[lastx][lasty].curr.pieceDef;
 		board[a][b].curr.white = board[lastx][lasty].curr.white;
 		board[lastx][lasty].curr.pieceDef = 0;
+		if ((b==0 || b==7) && board[a][b].curr.pieceDef==1 )
+			board[a][b].curr.pieceDef = 5;
 		board[a][b].setclear();
 		board[lastx][lasty].setclear();
 		board[a][b].drawPiece();
@@ -283,6 +305,7 @@ int lastx,lasty;
 			return;
 		}
 		logentry lg = move_stack.top();
+		move_stack.pop();
 		int last = lg.move.second;
 		int prev = lg.move.first;
 		chessPiece prevPiece = lg.Apiece;
@@ -291,7 +314,7 @@ int lastx,lasty;
 		lasty = last%8;
 		int a = prev/8;
 		int b = prev%8;
-		move_stack.pop();
+			
 		board[a][b].curr.pieceDef = prevPiece.pieceDef;
 		board[a][b].curr.white = prevPiece.white;
 		board[lastx][lasty].curr.pieceDef = lastPiece.pieceDef;
@@ -302,6 +325,10 @@ int lastx,lasty;
 		board[lastx][lasty].drawPiece();
 		lastWhite = !lastWhite;
 		glFlush();
+		if (prevPiece.pieceDef == 6 && abs(a-lastx)>1){
+			undo();
+			lastWhite = !lastWhite;
+		}
 	}
 
 }cb;
@@ -648,6 +675,71 @@ vector<int> legalMoves(int pos, bool lastWhite){											//Castling and Empass
 				cb.board[x][y].curr.pieceDef = delp;
 				cb.board[x][y].curr.white = !cb.board[a][b].curr.white;
 			}
+		}
+		//Check for castling...
+		if (a == 4 && b==(cb.board[a][b].curr.white? 0 : 7)){
+			bool poss = true;
+			cout<<"Checking for castling R..\n";
+			if (cb.board[a+1][b].curr.pieceDef != 0 || cb.board[a+2][b].curr.pieceDef != 0 || cb.board[a+3][b].curr.pieceDef != 4 || cb.board[a+3][b].curr.white != cb.board[a][b].curr.white || (legalState(!lastWhite))){
+				cout<<"False at 1\n";
+				poss =  false;
+			}
+			if (poss){
+			cb.board[a][b].curr.pieceDef = 0;
+			cb.board[a+1][b].curr.pieceDef = 6;
+			cb.board[a+1][b].curr.white = cb.board[a][b].curr.white;
+			if (!legalState(!lastWhite) ){
+				cout<<"False at 2\n";
+				poss = false;
+			}
+			cb.board[a+1][b].curr.pieceDef = 0;
+			cb.board[a][b].curr.pieceDef = 6;
+			}
+			if (poss){
+			cb.board[a][b].curr.pieceDef = 0;
+			cb.board[a+2][b].curr.pieceDef = 6;
+			cb.board[a+2][b].curr.white = cb.board[a][b].curr.white;
+			if (!legalState(!lastWhite) ){
+				cout<<"False at 2\n";
+				poss = false;
+			}
+			cb.board[a+2][b].curr.pieceDef = 0;
+			cb.board[a][b].curr.pieceDef = 6;
+			}
+			if (poss)
+				moves.push_back((a+2)*8 + b);
+		}
+		if (a == 4 && b==(cb.board[a][b].curr.white? 0 : 7)){
+			bool poss = true;
+			cout<<"Checking for castling L..\n";
+			if (cb.board[a-1][b].curr.pieceDef != 0 || cb.board[a-2][b].curr.pieceDef != 0 || cb.board[a-3][b].curr.pieceDef != 0 || cb.board[a-4][b].curr.pieceDef != 4 || cb.board[a-4][b].curr.white != cb.board[a][b].curr.white){
+				cout<<"False at 4\n";
+				poss =  false;
+			}
+			if (poss){
+			cb.board[a][b].curr.pieceDef = 0;
+			cb.board[a-1][b].curr.pieceDef = 6;
+			cb.board[a-1][b].curr.white = cb.board[a][b].curr.white;
+			if (!legalState(!lastWhite) ){
+				cout<<"False at 5\n";
+				poss = false;
+			}
+			cb.board[a-1][b].curr.pieceDef = 0;
+			cb.board[a][b].curr.pieceDef = 6;
+			}
+			if (poss){
+			cb.board[a][b].curr.pieceDef = 0;
+			cb.board[a-2][b].curr.pieceDef = 6;
+			cb.board[a-2][b].curr.white = cb.board[a][b].curr.white;
+			if (!legalState(!lastWhite) ){
+				cout<<"False at 6\n";
+				poss = false;
+			}
+			cb.board[a-2][b].curr.pieceDef = 0;
+			cb.board[a][b].curr.pieceDef = 6;
+			}
+			if (poss)
+				moves.push_back((a-2)*8 + b);
 		}
 	}
 	return moves;
