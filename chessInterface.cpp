@@ -6,7 +6,10 @@ static int value;
 static int window;
 int screen_render = 0;
 string CHESS[7] = {"empty","pawn","horse","bishop","rook","queen","king"};
+int cost[7] 		= {		0		,	10	,		30		,		30	,		50	,	90	,	900};
 vector<int> legalMoves(int, bool);
+
+
 
 class chessPiece{
 public:
@@ -32,11 +35,25 @@ public:
 	}
 };
 
+struct logentry{
+public:
+	pair<int,int> move;
+	chessPiece Apiece ;
+	chessPiece Bpiece ;
+	logentry(chessPiece A,chessPiece B , int locA , int locB){
+		move.first = locA;
+		move.second = locB;
+		Apiece = A;
+		Bpiece = B;
+	}
+};
+
 class chessSquare{
 public:
 	int x , y;
 	chessPiece curr;
-	bool white, legal;
+	bool white;
+	bool legal;
 
 	chessSquare(){
 		x=0;y=0;
@@ -52,6 +69,7 @@ public:
 				glColor3f(0.247,0.345,0.4);
 			}
 			glRecti(x+10,y+10,x+90,y+90);
+
 			return;
 		}
 		if(curr.white){
@@ -95,7 +113,7 @@ public:
 				case 6:
 						drawbK(x+10,y+10);
 						break;
-				}
+					}
 		}
 	}
 	void setSquare(chessPiece cp){
@@ -108,14 +126,12 @@ public:
 		glRecti(x,y,x+100,y+100);
 		drawPiece();
 		legal = true;
-		glFlush();
 	}
 
 	void setNormal(){
 		legal = false;
 		setclear();
 		drawPiece();
-		glFlush();
 	}
 
 	void setclear(){
@@ -125,14 +141,13 @@ public:
 			glColor3f(0.247,0.345,0.4);
 		}
 		glRecti(x,y,x+100,y+100);
-		glFlush();
 	}
 };
 
 class chessboard{
 public:
 chessSquare board[8][8];
-vector<pair<int,int> > move_stack;
+stack < logentry > move_stack;
 bool lastWhite;
 int lastx,lasty;
 	void initiate(){
@@ -199,6 +214,7 @@ int lastx,lasty;
 		for (auto x : moves){
 			cout<<x/8<<" "<<x%8<<endl;
 		}
+		glFlush();
 	}
 
 	void resetLegal(){
@@ -211,48 +227,75 @@ int lastx,lasty;
 
 	void move(int a , int b){
 		resetLegal();
-		move_stack.push_back({lastx*8 + lasty, a*8 + b});
+		logentry l(board[lastx][lasty].curr,board[a][b].curr,lastx*8 + lasty, a*8 + b);
+		move_stack.push(l);
 
 		board[a][b].curr.pieceDef = board[lastx][lasty].curr.pieceDef;
 		board[a][b].curr.white = board[lastx][lasty].curr.white;
 		board[lastx][lasty].curr.pieceDef = 0;
-		board[lastx][lasty].drawPiece();
+		board[a][b].setclear();
+		board[lastx][lasty].setclear();
 		board[a][b].drawPiece();
 
 		lastWhite = !lastWhite;
+
 		//cout<<"Moved ("<<lastx<<","<<lasty<<") to ("<<a<<","<<b<<")"<<endl;
 	}
 
  void click(int button, int state, int x, int y){
 			if(button == GLUT_LEFT_BUTTON &&state == GLUT_DOWN){
-			int a = x;
-			int b = 1000 - y;
-			cout << a << " " << b << endl;
-			a = a/100;
-			b = b/100;
-			a--,b--;
-			if(a>=0&&a<8&&b>=0&&b<8){
-				if (board[a][b].legal == true){
-					move(a,b);
-				}
-				else{
-					char c = 'A' + b;
-					cout << "squareSelected "<<c<<a<<endl;
-					cout << "\tsquare color = "<<(board[a][b].white?"white":"black") << endl;
-					cout << "\tselected piece = "<<CHESS[board[a][b].curr.pieceDef]<<endl;
-					cout << "\tpiece color = "<<(board[a][b].curr.white?"white":"black") << endl;
-					getlegal(a,b);
-					lastx = a, lasty = b;
-				}
-			}
 
+				int a = x;
+				int b = 1000 - y;
+				cout << a << " " << b << endl;
+				a = a/100;
+				b = b/100;
+				a--,b--;
+				cout << a << " " << b << endl;
+				if(a>=0&&a<8&&b>=0&&b<8){
+					if (board[a][b].legal == true){
+						move(a,b);
+					}
+					else{
+						char c = 'A' + b;
+						cout << "squareSelected "<<c<<a<<endl;
+						cout << "\tsquare color = "<<(board[a][b].white?"white":"black") << endl;
+						cout << "\tselected piece = "<<CHESS[board[a][b].curr.pieceDef]<<endl;
+						cout << "\tpiece color = "<<(board[a][b].curr.white?"white":"black") << endl;
+						getlegal(a,b);
+						lastx = a, lasty = b;
+					}
+			}
 		}
 	}
 
+	void undo(){
+		if(move_stack.empty()){
+			return;
+		}
+		logentry lg = move_stack.top();
+		int last = lg.move.second;
+		int prev = lg.move.first;
+		chessPiece prevPiece = lg.Apiece;
+		chessPiece lastPiece = lg.Bpiece;
+		lastx = last/8;
+		lasty = last%8;
+		int a = prev/8;
+		int b = prev%8;
+		move_stack.pop();
+		board[a][b].curr.pieceDef = prevPiece.pieceDef;
+		board[a][b].curr.white = prevPiece.white;
+		board[lastx][lasty].curr.pieceDef = lastPiece.pieceDef;
+		board[lastx][lasty].curr.white = lastPiece.white;
+		board[a][b].setclear();
+		board[lastx][lasty].setclear();
+		board[a][b].drawPiece();
+		board[lastx][lasty].drawPiece();
+		lastWhite = !lastWhite;
+		glFlush();
+	}
 
 }cb;
-
-
 
 void click(int button, int state, int x, int y){
 	if(button != GLUT_RIGHT_BUTTON){
@@ -284,10 +327,13 @@ void display(void)
 		cb.setpieces();
 		screen_render = 1;
 		cout << "lets start " << endl;
+		return;
+	}else if(screen_render == 2){
+		cb.undo();
+		screen_render = 1;
 	}
-
-
 }
+
 void menu(int num){
   if(num == 0){
     glutDestroyWindow(window);
@@ -295,6 +341,8 @@ void menu(int num){
   }else{
 		if(num == 1){
 			screen_render = 0;
+		}else if(num == 2){
+			screen_render = 2;
 		}
   }
   glutPostRedisplay();
