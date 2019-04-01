@@ -228,8 +228,9 @@ public:
 
 };
 
+void compMove(int,bool);
 vector<int> legalMoves(int, bool);
-float evalBoardState(chessSquare boardstate[8][8]);
+float evalBoardState();
 
 class chessboard{
 public:
@@ -287,7 +288,6 @@ int lastx,lasty;
 			for(int j = 0 ; j < 8 ; j++){
 				board[i][j].drawPiece();
 			}
-			glFlush();
 		}
 
 	}
@@ -344,11 +344,42 @@ int lastx,lasty;
 		board[a][b].drawPiece();
 
 		lastWhite = !lastWhite;
+		glFlush();
+		if (lastWhite)
+			compMove(4,lastWhite);
 	}
 
- void click(int button, int state, int x, int y){
+	void move(int a , int b, int lastx, int lasty){
+		if (board[lastx][lasty].curr.pieceDef==6 && abs(a-lastx) == 2){
+			if (a > lastx){
+				logentry m(board[a+1][b].curr,board[a-1][b].curr,(a+1)*8 + b, (a-1)*8 + b);
+				move_stack.push(m);
+				board[a-1][b].curr.pieceDef = 4;
+				board[a-1][b].curr.white = board[lastx][lasty].curr.white;
+				board[7][b].curr.pieceDef = 0;
+			}
+			else{
+				logentry n(board[a-2][b].curr,board[a+1][b].curr,(a-2)*8 + b, (a+1)*8 + b);
+				move_stack.push(n);
+				board[a+1][b].curr.pieceDef = 4;
+				board[a+1][b].curr.white = board[lastx][lasty].curr.white;
+				board[0][b].curr.pieceDef = 0;
+			}
+		}
+		logentry l(board[lastx][lasty].curr,board[a][b].curr,lastx*8 + lasty, a*8 + b);
+		move_stack.push(l);
+
+		board[a][b].curr.pieceDef = board[lastx][lasty].curr.pieceDef;
+		board[a][b].curr.white = board[lastx][lasty].curr.white;
+		board[lastx][lasty].curr.pieceDef = 0;
+		if ((b==0 || b==7) && board[a][b].curr.pieceDef==1 )
+			board[a][b].curr.pieceDef = 5;
+
+		lastWhite = !lastWhite;
+	}
+
+ 	void click(int button, int state, int x, int y){
 			if(button == GLUT_LEFT_BUTTON &&state == GLUT_DOWN){
-				cout << "board value =" << evalBoardState(board) << endl;
 				int a = x;
 				int b = 1000 - y;
 				a = a/100;
@@ -401,7 +432,6 @@ int lastx,lasty;
 		board[a][b].drawPiece();
 		board[lastx][lasty].drawPiece();
 		lastWhite = !lastWhite;
-		glFlush();
 		if (prevPiece.pieceDef == 6 && abs(a-lastx)>1){
 			undo();
 			lastWhite = !lastWhite;
@@ -757,9 +787,7 @@ vector<int> legalMoves(int pos, bool lastWhite){											//Castling and Empass
 		//Check for castling...
 		if (a == 4 && b==(cb.board[a][b].curr.white? 0 : 7)){
 			bool poss = true;
-			cout<<"Checking for castling R..\n";
 			if (cb.board[a+1][b].curr.pieceDef != 0 || cb.board[a+2][b].curr.pieceDef != 0 || cb.board[a+3][b].curr.pieceDef != 4 || cb.board[a+3][b].curr.white != cb.board[a][b].curr.white || (!legalState(!lastWhite))){
-				cout<<"False at 1\n";
 				poss =  false;
 			}
 			if (poss){
@@ -767,7 +795,6 @@ vector<int> legalMoves(int pos, bool lastWhite){											//Castling and Empass
 			cb.board[a+1][b].curr.pieceDef = 6;
 			cb.board[a+1][b].curr.white = cb.board[a][b].curr.white;
 			if (!legalState(!lastWhite) ){
-				cout<<"False at 2\n";
 				poss = false;
 			}
 			cb.board[a+1][b].curr.pieceDef = 0;
@@ -778,7 +805,6 @@ vector<int> legalMoves(int pos, bool lastWhite){											//Castling and Empass
 			cb.board[a+2][b].curr.pieceDef = 6;
 			cb.board[a+2][b].curr.white = cb.board[a][b].curr.white;
 			if (!legalState(!lastWhite) ){
-				cout<<"False at 2\n";
 				poss = false;
 			}
 			cb.board[a+2][b].curr.pieceDef = 0;
@@ -789,9 +815,7 @@ vector<int> legalMoves(int pos, bool lastWhite){											//Castling and Empass
 		}
 		if (a == 4 && b==(cb.board[a][b].curr.white? 0 : 7)){
 			bool poss = true;
-			cout<<"Checking for castling L..\n";
 			if (cb.board[a-1][b].curr.pieceDef != 0 || cb.board[a-2][b].curr.pieceDef != 0 || cb.board[a-3][b].curr.pieceDef != 0 || cb.board[a-4][b].curr.pieceDef != 4 || cb.board[a-4][b].curr.white != cb.board[a][b].curr.white){
-				cout<<"False at 4\n";
 				poss =  false;
 			}
 			if (poss){
@@ -799,7 +823,6 @@ vector<int> legalMoves(int pos, bool lastWhite){											//Castling and Empass
 			cb.board[a-1][b].curr.pieceDef = 6;
 			cb.board[a-1][b].curr.white = cb.board[a][b].curr.white;
 			if (!legalState(!lastWhite) ){
-				cout<<"False at 5\n";
 				poss = false;
 			}
 			cb.board[a-1][b].curr.pieceDef = 0;
@@ -810,7 +833,6 @@ vector<int> legalMoves(int pos, bool lastWhite){											//Castling and Empass
 			cb.board[a-2][b].curr.pieceDef = 6;
 			cb.board[a-2][b].curr.white = cb.board[a][b].curr.white;
 			if (!legalState(!lastWhite) ){
-				cout<<"False at 6\n";
 				poss = false;
 			}
 			cb.board[a-2][b].curr.pieceDef = 0;
@@ -823,18 +845,14 @@ vector<int> legalMoves(int pos, bool lastWhite){											//Castling and Empass
 	return moves;
 }
 
-float evalMove(int start,int end){
-
-}
-
-float evalBoardState(chessSquare boardstate[8][8]){
+float evalBoardState(){
 	float val = 0;
 	for(int i = 0 ; i < 8 ; i++){
 		for(int j = 0 ; j < 8 ; j++){
-				bool Piecewhite = boardstate[i][j].curr.white;
+				bool Piecewhite = cb.board[i][j].curr.white;
 				float colorfactor = Piecewhite?-1.0:1.0;
 				float piecepos = 0;
-				switch (boardstate[i][j].curr.pieceDef) {
+				switch (cb.board[i][j].curr.pieceDef) {
 					case 0:
 						break;
 					case 1:
@@ -860,6 +878,93 @@ float evalBoardState(chessSquare boardstate[8][8]){
 				val += piecepos;
 		}
 	}
+}
+
+int minimax(int depth,int alpha,int beta,bool lastWhite) {
+    if (depth == 0) {
+        return evalBoardState();
+    }
+
+    vector <pair<int,int> > allMoves;
+	vector <int> curr;
+	for (int i = 0; i<8; i++){
+		for (int j = 0; j<8; j++){
+			if (cb.board[i][j].curr.pieceDef != 0 && cb.board[i][j].curr.white != lastWhite){
+				curr = legalMoves(i*8+j, lastWhite);
+				for (auto x : curr){
+					allMoves.push_back({i*8+j,x});
+				}
+			}
+		}
+	}
+
+    if ((!lastWhite)) {
+        int bestMove = -9999;
+        for (int i = 0; i < allMoves.size(); i++) {
+            int from = allMoves[i].first, to = allMoves[i].second;
+        	cb.move(to/8, to%8, from/8, from%8);
+            bestMove = max(bestMove, minimax(depth - 1, alpha, beta, !lastWhite));
+            cb.undo();
+            alpha = max(alpha, bestMove);
+            if (beta <= alpha) {
+                return bestMove;
+            }
+        }
+        return bestMove;
+    } else {
+        int bestMove = 9999;
+        for (int i = 0; i < allMoves.size(); i++) {
+            int from = allMoves[i].first, to = allMoves[i].second;
+        	cb.move(to/8, to%8, from/8, from%8);
+            bestMove = min(bestMove, minimax(depth - 1, alpha, beta, !lastWhite));
+            cb.undo();
+            beta = min(beta, bestMove);
+            if (beta <= alpha) {
+                return bestMove;
+            }
+        }
+        return bestMove;
+    }
+};
+
+void compMove(int depth,bool lastWhite) {
+	vector <pair<int,int> > allMoves;
+	vector <int> curr;
+	for (int i = 0; i<8; i++){
+		for (int j = 0; j<8; j++){
+			if (cb.board[i][j].curr.pieceDef != 0 && cb.board[i][j].curr.white != lastWhite){
+				curr = legalMoves(i*8+j, lastWhite);
+				for (auto x : curr){
+					allMoves.push_back({i*8+j,x});
+				}
+			}
+		}
+	}
+    int bestMove = INT_MIN;
+    pair<int,int> bestMoveFound;
+    if (allMoves.size() == 0){
+    	cout<<"CheckMated!! You Win!!\n";
+    	return;
+    }
+    for(int i = 0; i < allMoves.size(); i++) {
+    	int from = allMoves[i].first, to = allMoves[i].second;
+        cb.move(to/8, to%8, from/8, from%8 );
+        int value = minimax(depth - 1, -10000, 10000, !lastWhite);
+        cb.undo();
+        if (lastWhite && value > bestMove) {
+            bestMove = value;
+            bestMoveFound = allMoves[i];
+        }
+        else if ((!lastWhite) && value < bestMove) {
+            bestMove = value;
+            bestMoveFound = allMoves[i];
+        }
+    }
+    int from = bestMoveFound.first, to = bestMoveFound.second;
+    cb.lastx = from/8;
+    cb.lasty = from%8;
+    cb.move(to/8, to%8);
+    return;
 }
 
 void init2d()//how to display
@@ -888,15 +993,17 @@ void display(void)
 				pawnEvalBlack[i][j] = pawnEvalWhite[i][7-j];
 			}
 		}
-		glFlush();
 		cb.initiate();
 		cb.setpieces();
 		cb.emptyMoveLog();
+		glFlush();
 		screen_render = 1;
 		cout << "lets start " << endl;
 		return;
 	}else if(screen_render == 2){
 		cb.undo();
+		cb.undo();
+		glFlush();
 		screen_render = 1;
 	}
 }
