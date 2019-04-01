@@ -93,12 +93,6 @@ float kingEvalWhite[8][8]  = {
 
 float kingEvalBlack[8][8]  ;
 
-
-
-vector<int> legalMoves(int, bool);
-
-
-
 class chessPiece{
 public:
 	int pieceDef;
@@ -234,6 +228,9 @@ public:
 
 };
 
+vector<int> legalMoves(int, bool);
+float evalBoardState(chessSquare boardstate[8][8]);
+
 class chessboard{
 public:
 chessSquare board[8][8];
@@ -351,7 +348,7 @@ int lastx,lasty;
 
  void click(int button, int state, int x, int y){
 			if(button == GLUT_LEFT_BUTTON &&state == GLUT_DOWN){
-
+				cout << "board value =" << evalBoardState(board) << endl;
 				int a = x;
 				int b = 1000 - y;
 				a = a/100;
@@ -417,6 +414,7 @@ void click(int button, int state, int x, int y){
 	if(button != GLUT_RIGHT_BUTTON){
 		cb.click(button,state,x,y);
 	}
+
 
 }
 
@@ -825,6 +823,45 @@ vector<int> legalMoves(int pos, bool lastWhite){											//Castling and Empass
 	return moves;
 }
 
+float evalMove(int start,int end){
+
+}
+
+float evalBoardState(chessSquare boardstate[8][8]){
+	float val = 0;
+	for(int i = 0 ; i < 8 ; i++){
+		for(int j = 0 ; j < 8 ; j++){
+				bool Piecewhite = boardstate[i][j].curr.white;
+				float colorfactor = Piecewhite?-1.0:1.0;
+				float piecepos = 0;
+				switch (boardstate[i][j].curr.pieceDef) {
+					case 0:
+						break;
+					case 1:
+						piecepos += cost[1] + (Piecewhite?pawnEvalWhite[i][j]:pawnEvalBlack[i][j]);
+						break;
+					case 2:
+						piecepos += cost[2] + knightEval[i][j];
+						break;
+					case 3:
+						piecepos += cost[3] + (Piecewhite?bishopEvalWhite[i][j]:bishopEvalBlack[i][j]);
+						break;
+					case 4:
+						piecepos += cost[4] + (Piecewhite?rookEvalWhite[i][j]:rookEvalBlack[i][j]);
+						break;
+					case 5:
+						piecepos += cost[5] + evalQueen[i][j];
+						break;
+					case 6:
+						piecepos += cost[6] + (Piecewhite?kingEvalWhite[i][j]:kingEvalBlack[i][j]);
+						break;
+				}
+				piecepos*=colorfactor;
+				val += piecepos;
+		}
+	}
+}
+
 void init2d()//how to display
 {
 	glClearColor (1.0,1.0,1.0,0.0);
@@ -845,10 +882,10 @@ void display(void)
 		glColor3f(0.247, 0.345, 0.4);
 		for(int i = 0 ; i < 8 ;i++){
 			for(int j = 0 ; j < 8 ;j++){
-				kingEvalBlack[i][j] = kingEvalWhite[7-i][7-j];
-				bishopEvalBlack[i][j] = bishopEvalWhite[7-i][7-j];
-				rookEvalBlack[i][j] = rookEvalWhite[7-i][7-j];
-				pawnEvalBlack[i][j] = rookEvalWhite[7-i][7-i];
+				kingEvalBlack[i][j] = kingEvalWhite[i][7-j];
+				bishopEvalBlack[i][j] = bishopEvalWhite[i][7-j];
+				rookEvalBlack[i][j] = rookEvalWhite[i][7-j];
+				pawnEvalBlack[i][j] = pawnEvalWhite[i][7-j];
 			}
 		}
 		glFlush();
