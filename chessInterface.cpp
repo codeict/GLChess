@@ -760,7 +760,7 @@ vector<int> legalMoves(int pos, bool lastWhite){											//Castling and Empass
 		if (a == 4 && b==(cb.board[a][b].curr.white? 0 : 7)){
 			bool poss = true;
 			cout<<"Checking for castling R..\n";
-			if (cb.board[a+1][b].curr.pieceDef != 0 || cb.board[a+2][b].curr.pieceDef != 0 || cb.board[a+3][b].curr.pieceDef != 4 || cb.board[a+3][b].curr.white != cb.board[a][b].curr.white || (legalState(!lastWhite))){
+			if (cb.board[a+1][b].curr.pieceDef != 0 || cb.board[a+2][b].curr.pieceDef != 0 || cb.board[a+3][b].curr.pieceDef != 4 || cb.board[a+3][b].curr.white != cb.board[a][b].curr.white || (!legalState(!lastWhite))){
 				cout<<"False at 1\n";
 				poss =  false;
 			}
