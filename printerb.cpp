@@ -4824,7 +4824,7 @@ glBegin(GL_POINTS);
 	glVertex2i(x+71,y+40);
 	glColor3f(0.0,0.0,0.0);
 	glVertex2i(x+71,y+39);
-glEnd(); glFlush();
+glEnd();
 
 }
 void drawbQ (int x , int y ){
@@ -9868,7 +9868,7 @@ glBegin(GL_POINTS);
 	glVertex2i(x+73,y+57);
 	glColor3f(0.0,0.0,0.0);
 	glVertex2i(x+74,y+59);
-glEnd(); glFlush();
+glEnd();
 
 }
 void drawbB (int x , int y ){
@@ -13646,7 +13646,7 @@ glBegin(GL_POINTS);
 	glVertex2i(x+70,y+12);
 	glColor3f(0.0,0.0,0.0);
 	glVertex2i(x+71,y+13);
-glEnd(); glFlush();
+glEnd(); 
 
 }
 void drawbR (int x , int y ){
@@ -18300,7 +18300,7 @@ glBegin(GL_POINTS);
 	glVertex2i(x+65,y+11);
 	glColor3f(0.0,0.0,0.0);
 	glVertex2i(x+65,y+10);
-glEnd(); glFlush();
+glEnd(); 
 
 }
 void drawbN (int x , int y ){
@@ -23308,7 +23308,7 @@ glBegin(GL_POINTS);
 	glVertex2i(x+68,y+11);
 	glColor3f(0.0,0.0,0.0);
 	glVertex2i(x+68,y+10);
-glEnd(); glFlush();
+glEnd(); 
 
 }
 void drawbP (int x , int y ){
@@ -26548,6 +26548,6 @@ glBegin(GL_POINTS);
 	glVertex2i(x+60,y+10);
 	glColor3f(0.0,0.0,0.0);
 	glVertex2i(x+60,y+9);
-glEnd(); glFlush();
+glEnd(); 
 
 }
