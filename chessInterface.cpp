@@ -345,9 +345,23 @@ int lastx,lasty;
 
 		lastWhite = !lastWhite;
 		glFlush();
-		if (lastWhite)
-			compMove(4,lastWhite);
-		cout<<"Board Evaluation : "<<evalBoardState()<<endl;
+		if (lastWhite){
+			compMove(3,lastWhite);
+			bool checkmated = true;
+			for (int i = 0; i<8 && checkmated; i++){
+				for (int j = 0; j<8 && checkmated; j++){
+					if (board[i][j].curr.pieceDef != 0 && board[i][j].curr.white != lastWhite){
+						if (legalMoves(i*8+j, lastWhite).size() > 0)
+							checkmated = false;
+					}
+				}
+			}
+			if (checkmated){
+				cout<<"You Lose. Ha Ha Ha!!"<<endl;
+			}
+		}
+		
+		//cout<<"Board Evaluation : "<<evalBoardState()<<endl;
 	}
 
 	void move(int a , int b, int lastx, int lasty){
