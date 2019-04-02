@@ -346,7 +346,7 @@ int lastx,lasty;
 		lastWhite = !lastWhite;
 		glFlush();
 		if (lastWhite)
-			compMove(3,lastWhite);
+			compMove(4,lastWhite);
 		cout<<"Board Evaluation : "<<evalBoardState()<<endl;
 	}
 
@@ -941,7 +941,7 @@ void compMove(int depth,bool lastWhite) {
 			}
 		}
 	}
-    int bestMove = INT_MAX;
+    int alpha = INT_MIN, beta = INT_MAX;
     pair<int,int> bestMoveFound;
     if (allMoves.size() == 0){
     	cout<<"CheckMated!! You Win!!\n";
@@ -950,14 +950,14 @@ void compMove(int depth,bool lastWhite) {
     for(int i = 0; i < allMoves.size(); i++) {
     	int from = allMoves[i].first, to = allMoves[i].second;
         cb.move(to/8, to%8, from/8, from%8 );
-        int value = minimax(depth - 1, -10000, 10000, !lastWhite);
+        int value = minimax(depth - 1, alpha, beta, !lastWhite);
         cb.undo();
-        if (lastWhite && value < bestMove) {
-            bestMove = value;
+        if (lastWhite && value < beta) {
+            beta = value;
             bestMoveFound = allMoves[i];
         }
-        else if ((!lastWhite) && value > bestMove) {
-            bestMove = value;
+        else if ((!lastWhite) && value > alpha) {
+            alpha = value;
             bestMoveFound = allMoves[i];
         }
     }
