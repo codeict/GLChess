@@ -360,7 +360,7 @@ int lastx,lasty;
 				cout<<"You Lose. Ha Ha Ha!!"<<endl;
 			}
 		}
-		
+
 		//cout<<"Board Evaluation : "<<evalBoardState()<<endl;
 	}
 
@@ -406,10 +406,10 @@ int lastx,lasty;
 					}
 					else{
 						char c = 'A' + b;
-						cout << "squareSelected "<<c<<a<<endl;
-						cout << "\tsquare color = "<<(board[a][b].white?"white":"black") << endl;
-						cout << "\tselected piece = "<<CHESS[board[a][b].curr.pieceDef]<<endl;
-						cout << "\tpiece color = "<<(board[a][b].curr.white?"white":"black") << endl;
+						//cout << "squareSelected "<<c<<a<<endl;
+						//cout << "\tsquare color = "<<(board[a][b].white?"white":"black") << endl;
+						//cout << "\tselected piece = "<<CHESS[board[a][b].curr.pieceDef]<<endl;
+						//cout << "\tpiece color = "<<(board[a][b].curr.white?"white":"black") << endl;
 						getlegal(a,b);
 						lastx = a, lasty = b;
 					}
@@ -1013,7 +1013,7 @@ void display(void)
 		cb.emptyMoveLog();
 		glFlush();
 		screen_render = 1;
-		cout << "lets start " << endl;
+		//cout << "lets start " << endl;
 		return;
 	}else if(screen_render == 2){
 		cb.undo();
