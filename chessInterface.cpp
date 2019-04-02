@@ -346,7 +346,8 @@ int lastx,lasty;
 		lastWhite = !lastWhite;
 		glFlush();
 		if (lastWhite)
-			compMove(4,lastWhite);
+			compMove(3,lastWhite);
+		cout<<"Board Evaluation : "<<evalBoardState()<<endl;
 	}
 
 	void move(int a , int b, int lastx, int lasty){
@@ -850,7 +851,7 @@ float evalBoardState(){
 	for(int i = 0 ; i < 8 ; i++){
 		for(int j = 0 ; j < 8 ; j++){
 				bool Piecewhite = cb.board[i][j].curr.white;
-				float colorfactor = Piecewhite?-1.0:1.0;
+				float colorfactor = Piecewhite?1.0:-1.0;
 				float piecepos = 0;
 				switch (cb.board[i][j].curr.pieceDef) {
 					case 0:
@@ -899,7 +900,7 @@ int minimax(int depth,int alpha,int beta,bool lastWhite) {
 	}
 
     if ((!lastWhite)) {
-        int bestMove = -9999;
+        int bestMove = INT_MIN;
         for (int i = 0; i < allMoves.size(); i++) {
             int from = allMoves[i].first, to = allMoves[i].second;
         	cb.move(to/8, to%8, from/8, from%8);
@@ -912,7 +913,7 @@ int minimax(int depth,int alpha,int beta,bool lastWhite) {
         }
         return bestMove;
     } else {
-        int bestMove = 9999;
+        int bestMove = INT_MAX;
         for (int i = 0; i < allMoves.size(); i++) {
             int from = allMoves[i].first, to = allMoves[i].second;
         	cb.move(to/8, to%8, from/8, from%8);
@@ -940,7 +941,7 @@ void compMove(int depth,bool lastWhite) {
 			}
 		}
 	}
-    int bestMove = INT_MIN;
+    int bestMove = INT_MAX;
     pair<int,int> bestMoveFound;
     if (allMoves.size() == 0){
     	cout<<"CheckMated!! You Win!!\n";
@@ -951,11 +952,11 @@ void compMove(int depth,bool lastWhite) {
         cb.move(to/8, to%8, from/8, from%8 );
         int value = minimax(depth - 1, -10000, 10000, !lastWhite);
         cb.undo();
-        if (lastWhite && value > bestMove) {
+        if (lastWhite && value < bestMove) {
             bestMove = value;
             bestMoveFound = allMoves[i];
         }
-        else if ((!lastWhite) && value < bestMove) {
+        else if ((!lastWhite) && value > bestMove) {
             bestMove = value;
             bestMoveFound = allMoves[i];
         }
