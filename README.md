@@ -3,9 +3,9 @@ A Chess program using OpenGl written entirely in C++
 *(Python has been used to write large amounts of c++ openGL commands which will be addressed later)*
 
 Contributors:
-[Amitav Soni](https://github.com/soniamitav)
+[Alan John](https://github.com/TheForeverLost)
 
-This project was made for our 3rd semester's academic project
+This project was made for our 4th semester's academic project
 
 This is how it looks
 
@@ -28,8 +28,9 @@ As far as the AI is concerned , it uses a evaluation function which evaluates th
 
 ### Possible updates
 As of 4/4/19 <br>
-1.The games still doesnt support pawn empassiant move so we hope to introduce that soon<br>
-2.A proper graphical interface menu to make it more user friendly
+1. Parallel Processing with Iterative Deepening to improve efficiency.
+2. A graphical interface menu to make it more user friendly.
+3. Support for En Passant's Move.
 
 Please feel free to suggest improvements
 
