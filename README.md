@@ -1,3 +1,12 @@
+# Installation Instructions
+Make Sure that your Device has OpenGL Graphics installed. Open the terminal in the current directory and compile the game using the following command : 
+
+```g++ chessInterface.cpp -lglut -lGL -lGLU```
+
+And now you can execute the game using the command :  
+
+```./a.out```
+
 # GLChess
 A Chess program using OpenGl written entirely in C++
 *(Python has been used to write large amounts of c++ openGL commands which will be addressed later)*
