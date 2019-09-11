@@ -20,7 +20,7 @@ This is how it looks
 ![Demo](https://media.giphy.com/media/f6IVaSWY3YqcWzZULL/giphy.gif)
 
 ## Running the game
-It is important to run a program to check all possible legal moves which requires analysis into the rules of chess
+It is important to run a program to check all possible legal moves which requires analysis into the rules of chess.   
 The AI was made using Min-Max Technique in Game Decision Tree with Alpha-Beta pruning for time optimization.
 
 ### Possible updates
