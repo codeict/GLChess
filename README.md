@@ -1,3 +1,4 @@
+
 # Installation Instructions
 Make Sure that your Device has OpenGL Graphics installed. Open the terminal in the current directory and compile the game using the following command : 
 
@@ -12,6 +13,8 @@ A Chess program using OpenGl written entirely in C++. (Yes even the piece shapes
 
 Contributors:
 [Alan John](https://github.com/TheForeverLost)
+[Amitav Soni](https://github.com/soniamitav)
+
 
 This project was made for our 4th semester's academic project
 
